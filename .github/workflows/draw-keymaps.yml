@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'config/*.keymap'
-      - 'config/includes/*.dtsi'
-      - keymap-drawer/config.yaml
-      - .github/workflows/draw-keymaps.yml
+      - 'firmware/config/*.keymap'
+      - 'firmware/config/includes/*.dtsi'
+      - 'firmware/keymap-drawer/config.yaml'
+      - '.github/workflows/draw-keymaps.yml'
 
 permissions:
   contents: write
@@ -20,10 +20,10 @@ jobs:
   draw:
     uses: caksoylar/keymap-drawer/.github/workflows/draw-zmk.yml@e30a2e6ae744fa23b943938f3c8ba7b6c675e38e
     with:
-      keymap_patterns: 'config/*.keymap'
-      config_path: keymap-drawer/config.yaml
-      output_folder: keymap-drawer
+      keymap_patterns: 'firmware/config/*.keymap'
+      config_path: firmware/keymap-drawer/config.yaml
+      output_folder: firmware/keymap-drawer
       install_branch: v0.20.0
       amend_commit: true
-      json_path: keymap-drawer/layouts
+      json_path: firmware/keymap-drawer/layouts
       fail_on_error: true

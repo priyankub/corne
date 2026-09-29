@@ -1,14 +1,12 @@
 on:
   push:
     paths:
-      - config/west.yml
-      - config/*.keymap
-      - config/*.conf
-      - config/includes/*.dtsi
-      - config/boards/**
-      - boards/**
-      - build.yaml
+      - 'firmware/**'
+      - '.github/workflows/build.yml'
   pull_request:
+    paths:
+      - 'firmware/**'
+      - '.github/workflows/build.yml'
   workflow_dispatch:
 
 permissions:
@@ -40,4 +38,6 @@ jobs:
     needs: name-params
     uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3.0
     with:
+      build_matrix_path: firmware/build.yaml
+      config_path: firmware/config
       archive_name: zmk-senz-${{ needs.name-params.outputs.CURRENT_DATE }}-${{ needs.name-params.outputs.SHA_SLICE }}-${{ github.run_number }}
