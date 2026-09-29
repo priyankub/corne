@@ -98,8 +98,8 @@ The repository includes a battle-tested ZMK setup under [`firmware/`](firmware/)
 ### Building Firmware
 Build using the included GitHub Actions workflow or locally with the ZMK toolchain:
 ```bash
-west build -b nice_nano_v2 -d build/left -- -DSHIELD="corne_left nice_view_adapter nice_epaper"
-west build -b nice_nano_v2 -d build/right -- -DSHIELD="corne_right nice_view_adapter nice_epaper"
+west build -b nice_nano//zmk -d build/left -- -DSHIELD="corne_left nice_view_adapter nice_epaper"
+west build -b nice_nano//zmk -d build/right -- -DSHIELD="corne_right nice_view_adapter nice_epaper"
 ```
 
 ---

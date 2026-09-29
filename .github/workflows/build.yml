@@ -95,7 +95,7 @@ jobs:
         run: |
           mkdir -p artifacts
           name="${{ matrix.artifact-name || matrix.shield || matrix.board }}"
-          name=$(echo "$name" | tr ' ' '_')
+          name=$(echo "$name" | tr ' /' '__')
           cp firmware/build/zephyr/zmk.uf2 "artifacts/${name}.uf2"
           echo "artifact_name=${name}" >> $GITHUB_OUTPUT
 
