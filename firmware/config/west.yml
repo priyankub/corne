@@ -13,6 +13,6 @@ manifest:
     # support nice_oled and nice_epaper (Zephyr 4.1 + LVGL 9 compatible)
     - name: zmk-nice-oled
       remote: tokyo2006
-      revision: 4.0
+      revision: "4.0"
   self:
     path: config
