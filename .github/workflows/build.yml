@@ -80,15 +80,15 @@ jobs:
       - name: West Build
         working-directory: firmware
         run: |
-          extra_west_args=""
+          west_args=()
           if [ -n "${{ matrix.snippet }}" ]; then
-            extra_west_args="-S ${{ matrix.snippet }}"
+            west_args+=("-S" "${{ matrix.snippet }}")
           fi
-          extra_cmake_args=""
+          cmake_args=("-DZMK_CONFIG=$(pwd)/config")
           if [ -n "${{ matrix.shield }}" ]; then
-            extra_cmake_args="-DSHIELD=\"${{ matrix.shield }}\""
+            cmake_args+=("-DSHIELD=${{ matrix.shield }}")
           fi
-          west build -s zmk/app -d build -b "${{ matrix.board }}" $extra_west_args -- -DZMK_CONFIG="$(pwd)/config" $extra_cmake_args ${{ matrix.cmake-args }}
+          west build -s zmk/app -d build -b "${{ matrix.board }}" "${west_args[@]}" -- "${cmake_args[@]}" ${{ matrix.cmake-args }}
 
       - name: Prepare Artifact
         id: artifact
