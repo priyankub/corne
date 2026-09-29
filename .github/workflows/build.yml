@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   name-params:
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
     steps:
       - name: prepare archive name parameters
         id: set-date
