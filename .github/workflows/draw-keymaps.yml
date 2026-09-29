@@ -24,6 +24,5 @@ jobs:
       config_path: firmware/keymap-drawer/config.yaml
       output_folder: firmware/keymap-drawer
       install_branch: v0.20.0
-      amend_commit: true
-      json_path: firmware/keymap-drawer/layouts
+      amend_commit: false
       fail_on_error: true

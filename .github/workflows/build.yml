@@ -1,3 +1,5 @@
+name: Build Firmware
+
 on:
   push:
     paths:
@@ -13,31 +15,92 @@ permissions:
   contents: read
 
 concurrency:
-  group: build
+  group: build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  name-params:
+  matrix:
     runs-on: ubuntu-latest
-    steps:
-      - name: prepare archive name parameters
-        id: set-date
-        shell: bash
-        run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
-      - name: set sha slice
-        id: set-sha
-        shell: bash
-        run: echo "SHA_SLICE=$(echo '${{ github.sha }}' | cut -c 1-6)" >> $GITHUB_OUTPUT
-      - name: output current date
-        shell: bash
-        run: echo ${{ steps.set-date.outputs.CURRENT_DATE }}
+    name: Fetch Build Keyboards
     outputs:
-      CURRENT_DATE: ${{ steps.set-date.outputs.CURRENT_DATE }}
-      SHA_SLICE: ${{ steps.set-sha.outputs.SHA_SLICE }}
+      build_matrix: ${{ steps.set-matrix.outputs.build_matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Fetch Build Matrix
+        id: set-matrix
+        run: |
+          python3 -c "import yaml, json; print('build_matrix=' + json.dumps(yaml.safe_load(open('firmware/build.yaml'))['include']))" >> $GITHUB_OUTPUT
+
   build:
-    needs: name-params
-    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3.0
-    with:
-      build_matrix_path: firmware/build.yaml
-      config_path: firmware/config
-      archive_name: zmk-senz-${{ needs.name-params.outputs.CURRENT_DATE }}-${{ needs.name-params.outputs.SHA_SLICE }}-${{ github.run_number }}
+    runs-on: ubuntu-latest
+    container:
+      image: zmkfirmware/zmk-build-arm:stable
+    needs: matrix
+    name: Build (${{ matrix.shield || matrix.board }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.matrix.outputs.build_matrix) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache West Modules
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: |
+            firmware/modules/
+            firmware/tools/
+            firmware/zephyr/
+            firmware/bootloader/
+            firmware/zmk/
+            firmware/zmk-nice-oled/
+          key: ${{ runner.os }}-zmk-${{ hashFiles('firmware/config/west.yml', 'firmware/build.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-zmk-
+
+      - name: West Init
+        working-directory: firmware
+        run: |
+          if [ ! -d .west ]; then
+            west init -l config
+          fi
+
+      - name: West Update
+        working-directory: firmware
+        run: west update --fetch-opt=--filter=tree:0
+
+      - name: West Zephyr Export
+        working-directory: firmware
+        run: west zephyr-export
+
+      - name: West Build
+        working-directory: firmware
+        run: |
+          extra_west_args=""
+          if [ -n "${{ matrix.snippet }}" ]; then
+            extra_west_args="-S ${{ matrix.snippet }}"
+          fi
+          extra_cmake_args=""
+          if [ -n "${{ matrix.shield }}" ]; then
+            extra_cmake_args="-DSHIELD=\"${{ matrix.shield }}\""
+          fi
+          west build -s zmk/app -d build -b "${{ matrix.board }}" $extra_west_args -- -DZMK_CONFIG="$(pwd)/config" $extra_cmake_args ${{ matrix.cmake-args }}
+
+      - name: Prepare Artifact
+        id: artifact
+        run: |
+          mkdir -p artifacts
+          name="${{ matrix.artifact-name || matrix.shield || matrix.board }}"
+          name=$(echo "$name" | tr ' ' '_')
+          cp firmware/build/zephyr/zmk.uf2 "artifacts/${name}.uf2"
+          echo "artifact_name=${name}" >> $GITHUB_OUTPUT
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact.outputs.artifact_name }}
+          path: artifacts/*.uf2

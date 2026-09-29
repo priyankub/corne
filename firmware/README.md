@@ -1,45 +1,31 @@
-# zmk-config
+# Corne Chocolate ZMK Firmware
 
-This repository contains my personal ZMK configurations for various keyboards.
-Currently, the following keyboards are supported:
-- [Corne MX wireless](./config/corne.keymap)
-- [Totem wireless](./config/totem.keymap)
-- [Rev57LP](./config/rev57lp.keymap)
-- [Dasbob](./config/dasbob.keymap)
+ZMK firmware configuration for the Corne Chocolate Wireless keyboard (nice!nano v2 + nice!view).
 
-## Keymap representation
+## Features
 
-Below representation was generated with [`keymap-drawer`](https://github.com/caksoylar/keymap-drawer) – check out the automatically generated layouts using the [automated Github workflow](https://github.com/caksoylar/keymap-drawer/tree/main#setting-up-an-automated-drawing-workflow) for each keyboard in the [`keymap-drawer` folder](keymap-drawer/), which is always up to date with the config.
+- **Controller**: nice!nano v2 (BLE nRF52840)
+- **Displays**: nice!view / Sharp Memory LCD with custom display status screen
+- **Backlight & Underglow**: RGB WS2812 strip with relocated data pin (`P0.08` / `D0`)
+- **Realtime Mapping**: ZMK Studio support enabled
 
-### Corne MX
+## Keymap Visualization
 
-<details>
-    <summary>Click to expand</summary>
+Keymap layout generated with [`keymap-drawer`](https://github.com/caksoylar/keymap-drawer):
 
-![Keymap Representation](./keymap-drawer/corne.svg?raw=true "Keymap Representation for Corne MX")
-</details>
+![Corne Keymap](keymap-drawer/corne.svg)
 
-### Totem wireless
+## Building Firmware Locally
 
-<details>
-    <summary>Click to expand</summary>
+```bash
+# Initialize west workspace
+west init -l config
+west update
+west zephyr-export
 
-![Keymap Representation](./keymap-drawer/totem.svg?raw=true "Keymap Representation for Totem wireless")
-</details>
+# Build Left Half
+west build -s zmk/app -d build/left -b nice_nano_v2 -S studio-rpc-usb-uart -- -DSHIELD="corne_left nice_view_adapter nice_epaper" -DZMK_CONFIG="$(pwd)/config"
 
-### Rev57LP
-
-<details>
-    <summary>Click to expand</summary>
-
-![Keymap Representation](./keymap-drawer/rev57lp.svg?raw=true "Keymap Representation for Rev57LP wireless")
-</details>
-
-### Dasbob wireless
-
-<details>
-    <summary>Click to expand</summary>
-
-![Keymap Representation](./keymap-drawer/dasbob.svg?raw=true "Keymap Representation for Dasbob wireless")
-</details>
-
+# Build Right Half
+west build -s zmk/app -d build/right -b nice_nano_v2 -- -DSHIELD="corne_right nice_view_adapter nice_epaper" -DZMK_CONFIG="$(pwd)/config"
+```

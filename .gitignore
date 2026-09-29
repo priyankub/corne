@@ -20,3 +20,16 @@ fp-info-cache
 # Build / Output
 hardware/production/backups/
 .history/
+.west/
+firmware/.west/
+firmware/build/
+firmware/modules/
+firmware/tools/
+firmware/zephyr/
+firmware/bootloader/
+firmware/zmk/
+firmware/zmk-nice-oled/
+artifacts/
+*.uf2
+*.bin
+*.hex
