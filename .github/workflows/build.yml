@@ -74,7 +74,12 @@ jobs:
 
       - name: West Update
         working-directory: firmware
-        run: west update --fetch-opt=--filter=tree:0
+        run: |
+          west update --fetch-opt=--filter=tree:0 || {
+            echo "West update failed; cleaning cached zmk-nice-oled and retrying..."
+            rm -rf zmk-nice-oled
+            west update --fetch-opt=--filter=tree:0
+          }
 
       - name: West Zephyr Export
         working-directory: firmware
