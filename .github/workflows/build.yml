@@ -37,6 +37,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: zmkfirmware/zmk-build-arm:stable
+    defaults:
+      run:
+        shell: bash
     needs: matrix
     name: Build (${{ matrix.shield || matrix.board }})
     strategy:
