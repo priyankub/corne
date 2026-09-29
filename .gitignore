@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# KiCad Temporary & Backup files
+*.bak
+*.kicad_pcb-bak
+*.kicad_sch-bak
+*-backups/
+_autosave-*
+*.tmp
+*-save.pro
+*-save.kicad_pcb
+*~
+*.lck
+fp-info-cache
+
+# Build / Output
+hardware/production/backups/
+.history/

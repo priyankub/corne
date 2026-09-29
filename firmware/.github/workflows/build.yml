@@ -1,0 +1,43 @@
+on:
+  push:
+    paths:
+      - config/west.yml
+      - config/*.keymap
+      - config/*.conf
+      - config/includes/*.dtsi
+      - config/boards/**
+      - boards/**
+      - build.yaml
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build
+  cancel-in-progress: true
+
+jobs:
+  name-params:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: prepare archive name parameters
+        id: set-date
+        shell: bash
+        run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      - name: set sha slice
+        id: set-sha
+        shell: bash
+        run: echo "SHA_SLICE=$(echo '${{ github.sha }}' | cut -c 1-6)" >> $GITHUB_OUTPUT
+      - name: output current date
+        shell: bash
+        run: echo ${{ steps.set-date.outputs.CURRENT_DATE }}
+    outputs:
+      CURRENT_DATE: ${{ steps.set-date.outputs.CURRENT_DATE }}
+      SHA_SLICE: ${{ steps.set-sha.outputs.SHA_SLICE }}
+  build:
+    needs: name-params
+    uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.2.1
+    with:
+      archive_name: zmk-senz-${{ needs.name-params.outputs.CURRENT_DATE }}-${{ needs.name-params.outputs.SHA_SLICE }}-${{ github.run_number }}
